@@ -1,0 +1,10 @@
+site_name: Authentication Kit
+pages:
+- [index.md, Home]
+- [AuthenticationKit.Validator.md, Interfaces, AuthenticationKit.Validator]
+- [AuthenticationKit.User.md, Interfaces, AuthenticationKit.User]
+- [AuthenticationKit.MutableUser.md, Interfaces, AuthenticationKit.MutableUser]
+- [AuthenticationKit.Token.md, Classes, AuthenticationKit.Token]
+- [AuthenticationKit.SecondFactorGenerator.md, Classes, AuthenticationKit.SecondFactorGenerator]
+- [History.md, Version History]
+theme: flatly
