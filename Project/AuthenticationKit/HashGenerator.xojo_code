@@ -19,17 +19,17 @@ Private Class HashGenerator
 		  Next
 		  
 		  If Self.TwoFactorEnabled Then
-		    If Self.SecondFactorGenerator = Nil Then
-		      Self.SecondFactorGenerator = New AuthenticationKit.SecondFactorGenerator(Xojo.Crypto.GenerateRandomBytes(ByteCount))
+		    If Self.TwoFactorProfile = Nil Then
+		      Self.TwoFactorProfile = New AuthenticationKit.TwoFactorProfile(Xojo.Crypto.GenerateRandomBytes(ByteCount))
 		    End If
 		    
-		    Dim Secret As Xojo.Core.MemoryBlock = Self.SecondFactorGenerator.Secret
+		    Dim Secret As Xojo.Core.MemoryBlock = Self.TwoFactorProfile.Secret
 		    Self.SecondFactorSalt = Xojo.Crypto.GenerateRandomBytes(ByteCount)
 		    Dim SecretHash As Xojo.Core.MemoryBlock = Xojo.Crypto.PBKDF2(Self.SecondFactorSalt, PassBytes, Self.Iterations, ByteCount, Self.Algorithm)
 		    Dim Token As New AuthenticationKit.Token(SecretHash, Secret)
 		    Tokens.Append(Token)
 		  Else
-		    Self.SecondFactorGenerator = Nil
+		    Self.TwoFactorProfile = Nil
 		    Self.SecondFactorSalt = Nil
 		  End If
 		  
@@ -57,10 +57,6 @@ Private Class HashGenerator
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		SecondFactorGenerator As AuthenticationKit.SecondFactorGenerator
-	#tag EndProperty
-
-	#tag Property, Flags = &h0
 		SecondFactorSalt As Xojo.Core.MemoryBlock
 	#tag EndProperty
 
@@ -69,11 +65,20 @@ Private Class HashGenerator
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
+		TwoFactorProfile As AuthenticationKit.TwoFactorProfile
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		ValidationHash As Xojo.Core.MemoryBlock
 	#tag EndProperty
 
 
 	#tag ViewBehavior
+		#tag ViewProperty
+			Name="Algorithm"
+			Group="Behavior"
+			Type="xojo.Crypto.HashAlgorithms"
+		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Index"
 			Visible=true
@@ -97,7 +102,7 @@ Private Class HashGenerator
 		#tag ViewProperty
 			Name="Password"
 			Group="Behavior"
-			Type="Integer"
+			Type="Text"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Super"
@@ -111,6 +116,11 @@ Private Class HashGenerator
 			Group="Position"
 			InitialValue="0"
 			Type="Integer"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="TwoFactorEnabled"
+			Group="Behavior"
+			Type="Boolean"
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class

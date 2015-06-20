@@ -103,12 +103,6 @@ Protected Module AuthenticationKit
 	#tag EndMethod
 
 
-	#tag Note, Name = Documentation
-		
-		Documentation can be found at http://docs.thezaz.com/authenticationkit/1.0.0
-	#tag EndNote
-
-
 	#tag ViewBehavior
 		#tag ViewProperty
 			Name="Index"

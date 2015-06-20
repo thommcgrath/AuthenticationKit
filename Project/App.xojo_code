@@ -29,7 +29,7 @@ Inherits ConsoleApplication
 		  Dim Tokens() As AuthenticationKit.Token
 		  Dim User As AuthenticationKit.User
 		  Dim EditableUser As AuthenticationKit.MutableUser
-		  Dim Generator As AuthenticationKit.SecondFactorGenerator
+		  Dim Generator As AuthenticationKit.TwoFactorProfile
 		  
 		  // First test is to create a user, set the password, and save it.
 		  EditableUser = New MutableSampleUser(Self.CreateUUID)
