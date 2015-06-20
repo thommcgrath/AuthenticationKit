@@ -108,6 +108,11 @@ Protected Module AuthenticationKit
 		Documentation can be found at http://docs.thezaz.com/authenticationkit/1.0.0
 	#tag EndNote
 
+	#tag Note, Name = Version
+		
+		1.0.0
+	#tag EndNote
+
 
 	#tag ViewBehavior
 		#tag ViewProperty
