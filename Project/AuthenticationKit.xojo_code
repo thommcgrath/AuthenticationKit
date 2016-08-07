@@ -17,6 +17,59 @@ Protected Module AuthenticationKit
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h21, CompatibilityFlags = (not TargetHasGUI and not TargetWeb and not TargetIOS) or  (TargetWeb) or  (TargetHasGUI)
+		Private Function ConvertMemoryBlock(InData As Global.MemoryBlock) As Xojo.Core.MemoryBlock
+		  Dim OutData As New Xojo.Core.MutableMemoryBlock(InData.Size)
+		  OutData.LittleEndian = InData.LittleEndian
+		  
+		  For I As Integer = 0 To OutData.Size - 1
+		    OutData.UInt8Value(I) = InData.UInt8Value(I)
+		  Next
+		  
+		  Return OutData
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21, CompatibilityFlags = (not TargetHasGUI and not TargetWeb and not TargetIOS) or  (TargetWeb) or  (TargetHasGUI)
+		Private Function ConvertMemoryBlock(InData As Xojo.Core.MemoryBlock) As Global.MemoryBlock
+		  Dim OutData As New Global.MemoryBlock(InData.Size)
+		  OutData.LittleEndian = InData.LittleEndian
+		  
+		  For I As Integer = 0 To OutData.Size - 1
+		    OutData.UInt8Value(I) = InData.UInt8Value(I)
+		  Next
+		  
+		  Return OutData
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function PBKDF2(Salt As Xojo.Core.MemoryBlock, Data As Xojo.Core.MemoryBlock, Iterations As UInt32, DesiredHashLength As UInteger, HashAlgorithm As Xojo.Crypto.HashAlgorithms) As Xojo.Core.MemoryBlock
+		  // This method exists solely to work around <feedback://showreport?report_id=44857>
+		  
+		  #if TargetWin32
+		    Dim ClassicSalt As Global.MemoryBlock = AuthenticationKit.ConvertMemoryBlock(Salt)
+		    Dim ClassicData As Global.MemoryBlock = AuthenticationKit.ConvertMemoryBlock(Data)
+		    Dim ClassicAlgorithm As Crypto.Algorithm
+		    Select Case HashAlgorithm
+		    Case Xojo.Crypto.HashAlgorithms.MD5
+		      ClassicAlgorithm = Crypto.Algorithm.MD5
+		    Case Xojo.Crypto.HashAlgorithms.SHA1
+		      ClassicAlgorithm = Crypto.Algorithm.SHA1
+		    Case Xojo.Crypto.HashAlgorithms.SHA256
+		      ClassicAlgorithm = Crypto.Algorithm.SHA256
+		    Case Xojo.Crypto.HashAlgorithms.SHA512
+		      ClassicAlgorithm = Crypto.Algorithm.SHA512
+		    End Select
+		    
+		    Dim ClassicHash As Global.MemoryBlock = Crypto.PBKDF2(ClassicSalt, ClassicData, Iterations, DesiredHashLength, ClassicAlgorithm)
+		    Return AuthenticationKit.ConvertMemoryBlock(ClassicHash)
+		  #else
+		    Return Xojo.Crypto.PBKDF2(Salt, Data, Iterations, DesiredHashLength, HashAlgorithm)
+		  #endif
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Function Save(Extends Validator As AuthenticationKit.Validator, Tokens() As AuthenticationKit.Token) As Boolean
 		  Dim Users() As AuthenticationKit.User
@@ -76,13 +129,13 @@ Protected Module AuthenticationKit
 		  Dim PassBytes As Xojo.Core.MemoryBlock = Xojo.Core.TextEncoding.UTF32BigEndian.ConvertTextToData(Password)
 		  Dim ByteCount As UInteger = AuthenticationKit.ByteCount(User.Algorithm)
 		  
-		  Dim ComputedHash As Xojo.Core.MemoryBlock = Xojo.Crypto.PBKDF2(User.PasswordSalt, PassBytes, User.Iterations, ByteCount, User.Algorithm)
+		  Dim ComputedHash As Xojo.Core.MemoryBlock = AuthenticationKit.PBKDF2(User.PasswordSalt, PassBytes, User.Iterations, ByteCount, User.Algorithm)
 		  Dim ValidationSalt As Xojo.Core.MemoryBlock = Validator.LookupSalt(ComputedHash)
 		  If ValidationSalt = Nil Then
 		    Return False
 		  End If
 		  
-		  Dim ValidationHash As Xojo.Core.MemoryBlock = Xojo.Crypto.PBKDF2(ValidationSalt, PassBytes, User.Iterations, ByteCount, User.Algorithm)
+		  Dim ValidationHash As Xojo.Core.MemoryBlock = AuthenticationKit.PBKDF2(ValidationSalt, PassBytes, User.Iterations, ByteCount, User.Algorithm)
 		  If ValidationHash <> User.ValidationHash Then
 		    Return False
 		  End If
@@ -91,7 +144,7 @@ Protected Module AuthenticationKit
 		    Return True
 		  End If
 		  
-		  Dim SecretHash As Xojo.Core.MemoryBlock = Xojo.Crypto.PBKDF2(User.SecondFactorSalt, PassBytes, User.Iterations, ByteCount, User.Algorithm)
+		  Dim SecretHash As Xojo.Core.MemoryBlock = AuthenticationKit.PBKDF2(User.SecondFactorSalt, PassBytes, User.Iterations, ByteCount, User.Algorithm)
 		  Dim StoredSecret As Xojo.Core.MemoryBlock = Validator.LookupSalt(SecretHash)
 		  If StoredSecret = Nil Then
 		    Return False

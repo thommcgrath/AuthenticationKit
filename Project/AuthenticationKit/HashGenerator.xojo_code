@@ -8,8 +8,8 @@ Private Class HashGenerator
 		  Self.PasswordSalt = Xojo.Crypto.GenerateRandomBytes(ByteCount)
 		  Dim Salt2 As Xojo.Core.MemoryBlock = Xojo.Crypto.GenerateRandomBytes(ByteCount)
 		  
-		  Dim Hash1 As Xojo.Core.MemoryBlock = Xojo.Crypto.PBKDF2(PasswordSalt, PassBytes, Self.Iterations, ByteCount, Self.Algorithm)
-		  Self.ValidationHash = Xojo.Crypto.PBKDF2(Salt2, PassBytes, Self.Iterations, ByteCount, Self.Algorithm)
+		  Dim Hash1 As Xojo.Core.MemoryBlock = AuthenticationKit.PBKDF2(PasswordSalt, PassBytes, Self.Iterations, ByteCount, Self.Algorithm)
+		  Self.ValidationHash = AuthenticationKit.PBKDF2(Salt2, PassBytes, Self.Iterations, ByteCount, Self.Algorithm)
 		  
 		  Dim Tokens() As AuthenticationKit.Token
 		  Tokens.Append(New AuthenticationKit.Token(Hash1, Salt2))
@@ -25,7 +25,7 @@ Private Class HashGenerator
 		    
 		    Dim Secret As Xojo.Core.MemoryBlock = Self.TwoFactorProfile.Secret
 		    Self.SecondFactorSalt = Xojo.Crypto.GenerateRandomBytes(ByteCount)
-		    Dim SecretHash As Xojo.Core.MemoryBlock = Xojo.Crypto.PBKDF2(Self.SecondFactorSalt, PassBytes, Self.Iterations, ByteCount, Self.Algorithm)
+		    Dim SecretHash As Xojo.Core.MemoryBlock = AuthenticationKit.PBKDF2(Self.SecondFactorSalt, PassBytes, Self.Iterations, ByteCount, Self.Algorithm)
 		    Dim Token As New AuthenticationKit.Token(SecretHash, Secret)
 		    Tokens.Append(Token)
 		  Else
@@ -78,6 +78,13 @@ Private Class HashGenerator
 			Name="Algorithm"
 			Group="Behavior"
 			Type="xojo.Crypto.HashAlgorithms"
+			EditorType="Enum"
+			#tag EnumValues
+				"0 - MD5"
+				"1 - SHA1"
+				"2 - SHA256"
+				"3 - SHA512"
+			#tag EndEnumValues
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Index"
