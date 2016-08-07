@@ -163,7 +163,7 @@ Protected Module AuthenticationKit
 
 	#tag Note, Name = Version
 		
-		1.0.0
+		1.0.1
 	#tag EndNote
 
 
